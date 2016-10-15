@@ -1,7 +1,7 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var mongo = require('mongodb').MongoClient;
-var URL = "mongodb://localhost:27017/learnyoumongo";
+var URL = process.env.MONGODB_URI || "mongodb://localhost:27017/local";
 
 var app = express();
 
