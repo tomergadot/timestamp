@@ -2,6 +2,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var mongo = require('mongodb').MongoClient;
 var URL = process.env.MONGODB_URI || "mongodb://localhost:27017/local";
+var port = process.env.PORT || 8080;
 
 var app = express();
 
@@ -22,8 +23,8 @@ app.get('/:id', function (req, res) {
 
 
 
-app.listen(8080, function () {
-  console.log('Example app listening on port 8080!');
+app.listen(port, function () {
+  console.log('Example app listening on port ' + port);
 });
 
 var max_site_id = 0;
