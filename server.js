@@ -30,7 +30,8 @@ app.listen(port, function () {
 var max_site_id = 0;
 
 function generateSiteId() {
-    return max_site_id++;
+    max_site_id = max_site_id + 1;
+    return max_site_id;
 }
 
 function updateSiteId(id, site) {
@@ -39,7 +40,7 @@ function updateSiteId(id, site) {
       if(err) return console.log(err);
       console.log("updateSiteId: Connected to db");
       var collection = db.collection('sites');
-      collection.update({id: id}, {$set:{site:site}}, {upsert:true} , function(err, data) {
+      collection.insert({id:id, site:site}, function(err, data) {
           if(err) return console.log(err);
           console.log("written: " + JSON.stringify(data));});
       db.close();
@@ -50,12 +51,16 @@ function redirectToSite(id, res) {
     mongo.connect(URL, function(err, db) {
       // db gives access to the database
       if(err) return console.log(err);
-      console.log("redirectToSite: Connected to db");
+      console.log("redirectToSite: Connected to db. id: " + id);
       var collection = db.collection('sites');
-      collection.find({id: 1}).toArray(function(err, documents) {
+      collection.find({id : +id}).toArray(function(err, documents) {
           if(err) return console.log(err);
-          console.log("read: " + documents[0].site);
-          res.redirect(documents[0].site);
+          if(documents.length > 0) {
+            console.log("read: " + JSON.stringify(documents[0].site));
+            res.redirect(documents[0].site);
+          } else {
+              res.end("No site found.");
+          }
           });
           
       db.close();
