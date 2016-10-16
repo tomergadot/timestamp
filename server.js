@@ -15,7 +15,7 @@ app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 app.get('/new/:url(https?:\/\/[\da-z\.-]+\.[a-z\.]{2,6}\/?)', function (req, res) {
     console.log("Got request with site: " + req.params.url);
     var site_id = generateSiteId();
-    updateSiteId(site_id, req.params.url, res);
+    updateSiteId(site_id, req.params.url, req, res);
 });
 
 app.get('/:id', function (req, res) {
@@ -36,7 +36,7 @@ function generateSiteId() {
     return hashids.encode(max_site_id);
 }
 
-function updateSiteId(id, site, res) {
+function updateSiteId(id, site, req, res) {
     mongo.connect(URL, function(err, db) {
       // db gives access to the database
       if(err) return console.log(err);
@@ -45,10 +45,10 @@ function updateSiteId(id, site, res) {
       collection.insert({id:id, site:site}, function(err, data) {
           if(err) return console.log(err);
           console.log("written: " + JSON.stringify(data));
-          res.end({
+          res.end(JSON.stringify({
               original_url: site,
-              short_url: document.location.href + '/' + id
-          });
+              short_url: req.protocol + '://' + req.get('host') + '/' + id
+          }));
       });
       db.close();
 });
@@ -60,7 +60,7 @@ function redirectToSite(id, res) {
       if(err) return console.log(err);
       console.log("redirectToSite: Connected to db. id: " + id);
       var collection = db.collection('sites');
-      collection.find({id : +id}).toArray(function(err, documents) {
+      collection.find({id : id}).toArray(function(err, documents) {
           if(err) return console.log(err);
           if(documents.length > 0) {
             console.log("read: " + JSON.stringify(documents[0].site));
