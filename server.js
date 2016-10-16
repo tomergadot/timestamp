@@ -1,8 +1,8 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var mongo = require('mongodb').MongoClient;
-var hashids = require("hashids");
-var hash = new hashids(process.env.ID_SALT, "default salt");
+var Hashids = require("hashids");
+var hashids = new Hashids(process.env.ID_SALT || "default salt");
 
 var URL = process.env.MONGODB_URI || "mongodb://localhost:27017/local";
 var port = process.env.PORT || 8080;
@@ -33,7 +33,7 @@ var max_site_id = 0;
 
 function generateSiteId() {
     max_site_id = max_site_id + 1;
-    return hash.encode(max_site_id);
+    return hashids.encode(max_site_id);
 }
 
 function updateSiteId(id, site, res) {
