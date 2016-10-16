@@ -12,8 +12,7 @@ app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 app.get('/new/:url(https?:\/\/[\da-z\.-]+\.[a-z\.]{2,6}\/?)', function (req, res) {
     console.log("Got request with site: " + req.params.url);
     var site_id = generateSiteId();
-    updateSiteId(site_id, req.params.url);
-    res.end(site_id.toString());
+    updateSiteId(site_id, req.params.url, res);
 });
 
 app.get('/:id', function (req, res) {
@@ -34,7 +33,7 @@ function generateSiteId() {
     return max_site_id;
 }
 
-function updateSiteId(id, site) {
+function updateSiteId(id, site, res) {
     mongo.connect(URL, function(err, db) {
       // db gives access to the database
       if(err) return console.log(err);
@@ -42,7 +41,12 @@ function updateSiteId(id, site) {
       var collection = db.collection('sites');
       collection.insert({id:id, site:site}, function(err, data) {
           if(err) return console.log(err);
-          console.log("written: " + JSON.stringify(data));});
+          console.log("written: " + JSON.stringify(data));
+          res.end({
+              original_url: site,
+              short_url: document.location.href + '/' + id
+          });
+      });
       db.close();
 });
 }
